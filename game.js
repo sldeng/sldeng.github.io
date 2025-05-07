@@ -5,6 +5,9 @@ class Game2048 {
         this.bestScore = parseInt(localStorage.getItem('bestScore')) || 0;
         this.gameOver = false;
         this.tiles = [];
+        this.touchStartX = null;
+        this.touchStartY = null;
+        this.minSwipeDistance = 30; // 最小滑动距离
         this.init();
     }
 
@@ -17,36 +20,45 @@ class Game2048 {
 
     setupEventListeners() {
         document.addEventListener('keydown', this.handleKeyPress.bind(this));
-        document.addEventListener('touchstart', this.handleTouchStart.bind(this));
-        document.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        document.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: false });
+        document.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
+        document.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: false });
         document.querySelector('.new-game-btn').addEventListener('click', () => this.resetGame());
     }
 
     handleTouchStart(event) {
+        event.preventDefault();
         this.touchStartX = event.touches[0].clientX;
         this.touchStartY = event.touches[0].clientY;
     }
 
     handleTouchMove(event) {
+        event.preventDefault();
+    }
+
+    handleTouchEnd(event) {
+        event.preventDefault();
         if (!this.touchStartX || !this.touchStartY) return;
 
-        const touchEndX = event.touches[0].clientX;
-        const touchEndY = event.touches[0].clientY;
+        const touchEndX = event.changedTouches[0].clientX;
+        const touchEndY = event.changedTouches[0].clientY;
 
         const dx = touchEndX - this.touchStartX;
         const dy = touchEndY - this.touchStartY;
 
-        if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) this.move('right');
-            else this.move('left');
-        } else {
-            if (dy > 0) this.move('down');
-            else this.move('up');
+        // 只有当滑动距离超过阈值时才触发移动
+        if (Math.abs(dx) > this.minSwipeDistance || Math.abs(dy) > this.minSwipeDistance) {
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (dx > 0) this.move('right');
+                else this.move('left');
+            } else {
+                if (dy > 0) this.move('down');
+                else this.move('up');
+            }
         }
 
         this.touchStartX = null;
         this.touchStartY = null;
-        event.preventDefault();
     }
 
     handleKeyPress(event) {
