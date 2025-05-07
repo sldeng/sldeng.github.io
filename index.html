@@ -32,6 +32,11 @@
             margin-bottom: 20px;
         }
 
+        .header h1 {
+            font-size: 48px;
+            color: #776e65;
+        }
+
         .score-container {
             display: flex;
             gap: 20px;
@@ -52,6 +57,9 @@
             border-radius: 6px;
             position: relative;
             touch-action: none;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
         }
 
         .grid {
@@ -59,11 +67,13 @@
             grid-template-columns: repeat(4, 1fr);
             grid-gap: 15px;
             background: #bbada0;
+            width: 100%;
+            aspect-ratio: 1;
         }
 
         .cell {
-            width: 60px;
-            height: 60px;
+            width: 100%;
+            aspect-ratio: 1;
             background: rgba(238, 228, 218, 0.35);
             border-radius: 3px;
             display: flex;
@@ -77,8 +87,8 @@
 
         .tile {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: calc(25% - 12px);
+            aspect-ratio: 1;
             background: #eee4da;
             border-radius: 3px;
             display: flex;
@@ -132,16 +142,44 @@
         }
 
         @media (max-width: 500px) {
-            .cell, .tile {
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
+            body {
+                padding: 10px;
             }
+
+            .header h1 {
+                font-size: 36px;
+            }
+
+            .score-container {
+                gap: 10px;
+            }
+
+            .score-box {
+                padding: 8px 15px;
+                font-size: 16px;
+            }
+
+            .grid-container {
+                padding: 10px;
+            }
+
             .grid {
                 grid-gap: 10px;
             }
-            .grid-container {
-                padding: 10px;
+
+            .cell, .tile {
+                font-size: 20px;
+            }
+
+            .tile[data-value="128"],
+            .tile[data-value="256"],
+            .tile[data-value="512"] {
+                font-size: 18px;
+            }
+
+            .tile[data-value="1024"],
+            .tile[data-value="2048"] {
+                font-size: 16px;
             }
         }
     </style>

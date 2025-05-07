@@ -263,8 +263,14 @@ class Game2048 {
                     tile.className = 'tile';
                     tile.textContent = this.grid[i][j];
                     tile.setAttribute('data-value', this.grid[i][j]);
-                    tile.style.left = `${j * 75 + 15}px`;
-                    tile.style.top = `${i * 75 + 15}px`;
+                    
+                    // 计算位置
+                    const gap = 10; // 网格间距
+                    const containerWidth = container.clientWidth - 20; // 减去padding
+                    const tileWidth = (containerWidth - gap * 3) / 4; // 每个tile的宽度
+                    
+                    tile.style.left = `${j * (tileWidth + gap) + 10}px`;
+                    tile.style.top = `${i * (tileWidth + gap) + 10}px`;
                     container.appendChild(tile);
                 }
             }
