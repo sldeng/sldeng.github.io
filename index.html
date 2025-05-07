@@ -1,76 +1,181 @@
-<!doctype html>
-<html>
-
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>浏览器精确定位</title>
-    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048游戏</title>
     <style>
-        html,
-        body,
-        #container {
-            height: 100%;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .info {
-            width: 26rem;
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #faf8ef;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .score-box {
+            background: #bbada0;
+            padding: 10px 20px;
+            border-radius: 3px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .grid-container {
+            background: #bbada0;
+            padding: 15px;
+            border-radius: 6px;
+            position: relative;
+            touch-action: none;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 15px;
+            background: #bbada0;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background: rgba(238, 228, 218, 0.35);
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #776e65;
+            transition: all 0.15s ease;
+        }
+
+        .tile {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #eee4da;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #776e65;
+            transition: all 0.15s ease;
+        }
+
+        .tile[data-value="2"] { background: #eee4da; }
+        .tile[data-value="4"] { background: #ede0c8; }
+        .tile[data-value="8"] { background: #f2b179; color: white; }
+        .tile[data-value="16"] { background: #f59563; color: white; }
+        .tile[data-value="32"] { background: #f67c5f; color: white; }
+        .tile[data-value="64"] { background: #f65e3b; color: white; }
+        .tile[data-value="128"] { background: #edcf72; color: white; font-size: 20px; }
+        .tile[data-value="256"] { background: #edcc61; color: white; font-size: 20px; }
+        .tile[data-value="512"] { background: #edc850; color: white; font-size: 20px; }
+        .tile[data-value="1024"] { background: #edc53f; color: white; font-size: 18px; }
+        .tile[data-value="2048"] { background: #edc22e; color: white; font-size: 18px; }
+
+        .game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(238, 228, 218, 0.73);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 6px;
+        }
+
+        .game-over.active {
+            display: flex;
+        }
+
+        .new-game-btn {
+            background: #8f7a66;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .cell, .tile {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            .grid {
+                grid-gap: 10px;
+            }
+            .grid-container {
+                padding: 10px;
+            }
         }
     </style>
 </head>
-
 <body>
-    <div id="container"></div>
-    <div class="info">
-        <h4 id="status"></h4>
-        <hr>
-        <p id="result"></p>
-        <hr>
-        <p>由于众多浏览器已不再支持非安全域的定位请求，为保位成功率和精度，请升级您的站点到HTTPS。</p>
+    <div class="header">
+        <h1>2048</h1>
     </div>
-    <script type="text/javascript"
-        src="https://webapi.amap.com/maps?v=2.0&key=c54bd6a3d1ba0e048fa6c245ad2cd661"></script>
-    <script type="text/javascript">
-        var map = new AMap.Map('container', {
-            resizeEnable: true
-        });
-        AMap.plugin('AMap.Geolocation', function () {
-            var geolocation = new AMap.Geolocation({
-                enableHighAccuracy: true,//是否使用高精度定位，默认:true
-                timeout: 10000,          //超过10秒后停止定位，默认：5s
-                position: 'RB',    //定位按钮的停靠位置
-                offset: [10, 20], //定位按钮与设置的停靠位置的偏移量，默认：[10, 20]
-                zoomToAccuracy: true,   //定位成功后是否自动调整地图视野到定位点
-
-            });
-            map.addControl(geolocation);
-            geolocation.getCurrentPosition(function (status, result) {
-                if (status == 'complete') {
-                    onComplete(result)
-                } else {
-                    onError(result)
-                }
-            });
-        });
-        //解析定位结果
-        function onComplete(data) {
-            document.getElementById('status').innerHTML = '定位成功'
-            var str = [];
-            str.push('定位结果：' + data.position);
-            str.push('定位类别：' + data.location_type);
-            if (data.accuracy) {
-                str.push('精度：' + data.accuracy + ' 米');
-            }//如为IP精确定位结果则没有精度信息
-            str.push('是否经过偏移：' + (data.isConverted ? '是' : '否'));
-            document.getElementById('result').innerHTML = str.join('<br>');
-        }
-        //解析定位错误信息
-        function onError(data) {
-            document.getElementById('status').innerHTML = '定位失败'
-            document.getElementById('result').innerHTML = '失败原因排查信息:' + data.message + '</br>浏览器返回信息：' + data.originMessage;
-        }
-    </script>
+    <div class="score-container">
+        <div class="score-box">
+            分数: <span id="score">0</span>
+        </div>
+        <div class="score-box">
+            最高分: <span id="best-score">0</span>
+        </div>
+    </div>
+    <div class="grid-container">
+        <div class="grid">
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+            <div class="cell"></div>
+        </div>
+        <div class="game-over">
+            <h2>游戏结束!</h2>
+            <button class="new-game-btn">新游戏</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
 </body>
-
-</html>
+</html> 
