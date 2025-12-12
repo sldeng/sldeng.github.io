@@ -1,225 +1,41 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>2048游戏</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #faf8ef;
-            font-family: Arial, sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .header h1 {
-            font-size: 48px;
-            color: #776e65;
-        }
-
-        .score-container {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .score-box {
-            background: #bbada0;
-            padding: 10px 20px;
-            border-radius: 3px;
-            color: white;
-            font-size: 18px;
-        }
-
-        .grid-container {
-            background: #bbada0;
-            padding: 15px;
-            border-radius: 6px;
-            position: relative;
-            touch-action: none;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 15px;
-            background: #bbada0;
-            width: 100%;
-            aspect-ratio: 1;
-        }
-
-        .cell {
-            width: 100%;
-            aspect-ratio: 1;
-            background: rgba(238, 228, 218, 0.35);
-            border-radius: 3px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #776e65;
-            transition: all 0.15s ease;
-        }
-
-        .tile {
-            position: absolute;
-            width: calc(25% - 12px);
-            aspect-ratio: 1;
-            background: #eee4da;
-            border-radius: 3px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #776e65;
-            transition: all 0.15s ease;
-        }
-
-        .tile[data-value="2"] { background: #eee4da; }
-        .tile[data-value="4"] { background: #ede0c8; }
-        .tile[data-value="8"] { background: #f2b179; color: white; }
-        .tile[data-value="16"] { background: #f59563; color: white; }
-        .tile[data-value="32"] { background: #f67c5f; color: white; }
-        .tile[data-value="64"] { background: #f65e3b; color: white; }
-        .tile[data-value="128"] { background: #edcf72; color: white; font-size: 20px; }
-        .tile[data-value="256"] { background: #edcc61; color: white; font-size: 20px; }
-        .tile[data-value="512"] { background: #edc850; color: white; font-size: 20px; }
-        .tile[data-value="1024"] { background: #edc53f; color: white; font-size: 18px; }
-        .tile[data-value="2048"] { background: #edc22e; color: white; font-size: 18px; }
-
-        .game-over {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(238, 228, 218, 0.73);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            border-radius: 6px;
-        }
-
-        .game-over.active {
-            display: flex;
-        }
-
-        .new-game-btn {
-            background: #8f7a66;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 18px;
-            margin-top: 20px;
-        }
-
-        @media (max-width: 500px) {
-            body {
-                padding: 10px;
-            }
-
-            .header h1 {
-                font-size: 36px;
-            }
-
-            .score-container {
-                gap: 10px;
-            }
-
-            .score-box {
-                padding: 8px 15px;
-                font-size: 16px;
-            }
-
-            .grid-container {
-                padding: 10px;
-            }
-
-            .grid {
-                grid-gap: 10px;
-            }
-
-            .cell, .tile {
-                font-size: 20px;
-            }
-
-            .tile[data-value="128"],
-            .tile[data-value="256"],
-            .tile[data-value="512"] {
-                font-size: 18px;
-            }
-
-            .tile[data-value="1024"],
-            .tile[data-value="2048"] {
-                font-size: 16px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>支付宝强制下载 URL 图片</title>
 </head>
 <body>
-    <div class="header">
-        <h1>2048</h1>
-    </div>
-    <div class="score-container">
-        <div class="score-box">
-            分数: <span id="score">0</span>
-        </div>
-        <div class="score-box">
-            最高分: <span id="best-score">0</span>
-        </div>
-    </div>
-    <div class="grid-container">
-        <div class="grid">
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-            <div class="cell"></div>
-        </div>
-        <div class="game-over">
-            <h2>游戏结束!</h2>
-            <button class="new-game-btn">新游戏</button>
-        </div>
-    </div>
-    <script src="game.js"></script>
+
+<button id="downloadBtn" style="padding:10px 20px;font-size:16px;">
+  下载图片
+</button>
+
+<script>
+var imageUrl = "https://bc6.afbza.cn/mqrcode/qrcodeImg/1797313/1765522747945.png"; // 替换成你的
+
+document.getElementById("downloadBtn").onclick = function () {
+
+  // 方案：fetch → Blob → 强制下载
+  fetch(imageUrl)
+    .then(response => response.blob())
+    .then(blob => {
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "image.png";     // 下载文件名（可自定义）
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(url);
+    })
+    .catch(err => {
+      console.error("下载失败:", err);
+      alert("下载图片失败，请检查 URL 是否可访问");
+    });
+};
+</script>
+
 </body>
-</html> 
+</html>
