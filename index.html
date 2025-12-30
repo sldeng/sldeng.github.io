@@ -1,16 +1,55 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <title>支付宝强制下载 URL 图片</title>
-</head>
-<body>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>网络网页</title>
+    <style type="text/css">
+      .btn {
+        display: block;
+        margin: 20px auto;
+        padding: 5px;
+        background-color: #007aff;
+        border: 0;
+        color: #ffffff;
+        height: 40px;
+        width: 200px;
+      }
 
-<button id="downloadBtn" style="padding:10px 20px;font-size:16px;">
-  下载图片
-</button>
-<img src="https://bc6.afbza.cn/mqrcode/qrcodeImg/1797313/1765522747945.png">
-<script type="text/javascript">
+      .btn-red {
+        background-color: #dd524d;
+      }
+
+      .btn-yellow {
+        background-color: #f0ad4e;
+      }
+
+      .desc {
+        padding: 10px;
+        color: #999999;
+      }
+
+      .post-message-section {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="desc">web-view 组件加载网络 html 示例。点击下列按钮，跳转至其它页面。</p>
+    <div class="btn-list">
+      <button class="btn" type="button" data-action="navigateTo">navigateTo</button>
+      <button class="btn" type="button" data-action="redirectTo">redirectTo</button>
+      <button class="btn" type="button" data-action="navigateBack">navigateBack</button>
+      <button class="btn" type="button" data-action="reLaunch">reLaunch</button>
+      <button class="btn" type="button" data-action="switchTab">switchTab</button>
+    </div>
+    <div class="post-message-section">
+      <p class="desc">网页向应用发送消息，注意：小程序端应用会在此页面后退时接收到消息。</p>
+      <div class="btn-list">
+        <button class="btn btn-red" type="button" id="postMessage">postMessage</button>
+      </div>
+    </div>
+    <script type="text/javascript">
       var userAgent = navigator.userAgent;
       if (userAgent.indexOf('AlipayClient') > -1) {
         // 支付宝小程序的 JS-SDK 防止 404 需要动态加载，如果不需要兼容支付宝小程序，则无需引用此 JS 文件。
@@ -40,38 +79,58 @@
         document.querySelector('.post-message-section').style.visibility = 'visible';
       }
     </script>
-<script>
-var imageUrl = "https://bc6.afbza.cn/mqrcode/qrcodeImg/1797313/1765522747945.png"; // 替换成你的
-setTimeout(()=>{
+    <!-- uni 的 SDK -->
+    <!-- 需要把 uni.webview.1.5.6.js 下载到自己的服务器 -->
+    <script type="text/javascript" src="https://gitcode.com/dcloud/uni-app/tree/dev/dist/uni.webview.1.5.6.js"></script>
+    <script type="text/javascript">
+      // 待触发 `UniAppJSBridgeReady` 事件后，即可调用 uni 的 API。
+      document.addEventListener('UniAppJSBridgeReady', function() {
+        uni.postMessage({
+            data: {
+                action: 'message'
+            }
+        });
+        uni.getEnv(function(res) {
+            console.log('当前环境：' + JSON.stringify(res));
+        });
 
-  console.log('1111>>>>>')
-     uni.redirectTo({
-                  url: '/pages/submitResult/submitResult'
-  });
-},3000)
-document.getElementById("downloadBtn").onclick = function () {
-
-  // 方案：fetch → Blob → 强制下载
-  fetch(imageUrl)
-    .then(response => response.blob())
-    .then(blob => {
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "image.png";     // 下载文件名（可自定义）
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      URL.revokeObjectURL(url);
-    })
-    .catch(err => {
-      console.error("下载失败:", err);
-      alert("下载图片失败，请检查 URL 是否可访问");
-    });
-};
-</script>
-
-</body>
+        document.querySelector('.btn-list').addEventListener('click', function(evt) {
+          var target = evt.target;
+          if (target.tagName === 'BUTTON') {
+            var action = target.getAttribute('data-action');
+            switch (action) {
+              case 'switchTab':
+                uni.switchTab({
+                  url: '/pages/tabBar/API/API'
+                });
+                break;
+              case 'reLaunch':
+                uni.reLaunch({
+                  url: '/pages/tabBar/component/component'
+                });
+                break;
+              case 'navigateBack':
+                uni.navigateBack({
+                  delta: 1
+                });
+                break;
+              default:
+                uni[action]({
+                  url: '/pages/component/button/button'
+                });
+                break;
+            }
+          }
+        });
+        document.getElementById('postMessage').addEventListener('click', function() {
+          uni.postMessage({
+            data: {
+              action: 'message'
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
+
