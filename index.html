@@ -18,6 +18,19 @@
         alert('当前环境：' + JSON.stringify(res))
         console.log('当前环境：' + JSON.stringify(res));  
     });  
+    console.log(uni.navigateTo,'uni.navigateTo')
+    alert('11')
+     uni.navigateTo({  
+                    url: '/pages/component/button/button',
+                    success:function(res) {
+    // 通过eventChannel向被打开页面传送数据
+                       alert(JSON.stringify(res)) 
+                      },
+                      complete:function(){
+                         alert(JSON.stringify(res)) 
+                      }
+
+                }); 
      uni.postMessage({  
         data: {  
             action: 'postMessage'  
