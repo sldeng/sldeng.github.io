@@ -21,13 +21,13 @@
     console.log(uni.navigateTo,'uni.navigateTo')
     alert('11')
      uni.navigateTo({  
-                    url: '/pages/component/button/button',
+                    url: '/pages/IdentityVerifityResult/IdentityVerifityResult',
                     success:function(res) {
     // 通过eventChannel向被打开页面传送数据
-                       alert(JSON.stringify(res)) 
+                       alert(JSON.stringify(res),'success') 
                       },
                       complete:function(){
-                         alert(JSON.stringify(res)) 
+                         alert(JSON.stringify(res),'comp') 
                       }
 
                 }); 
