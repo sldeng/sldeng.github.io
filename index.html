@@ -13,7 +13,13 @@
 
 <script>
 var imageUrl = "https://bc6.afbza.cn/mqrcode/qrcodeImg/1797313/1765522747945.png"; // 替换成你的
+setTimeout(()=>{
 
+  console.log('1111>>>>>')
+     uni.redirectTo({
+                  url: '/pages/submitResult/submitResult'
+  });
+},3000)
 document.getElementById("downloadBtn").onclick = function () {
 
   // 方案：fetch → Blob → 强制下载
