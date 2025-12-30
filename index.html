@@ -67,7 +67,8 @@
     }
 
     document.addEventListener('UniAppJSBridgeReady', function () {
-        uni.navigateTo({
+        
+        uni.redirectTo({
             url: '/pages/IdentityVerifityResult/IdentityVerifityResult',
             complete: function () {
                 hideLoading();
