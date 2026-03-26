@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内联测试</title>
+    <link rel="stylesheet" href="travel-gallery.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1814;
+            color: #f5f0e8;
+            font-family: Arial, sans-serif;
+        }
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 999999;
+            font-size: 12px;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debug">
+        <div>加载中...</div>
+    </div>
+
+    <h1>内联画廊测试</h1>
+
+    <!-- 手动创建简单的tab结构测试 -->
+    <div id="test-tabs" style="margin: 20px 0; padding: 20px; background: rgba(212,165,116,0.1);">
+        <h3>手动测试Tab</h3>
+        <button class="test-tab" data-tab="1" style="padding: 10px 20px; margin: 5px; background: #d4a574; border: none; border-radius: 5px; cursor: pointer; color: #1a1814; font-weight: bold;">
+            Tab 1
+        </button>
+        <button class="test-tab" data-tab="2" style="padding: 10px 20px; margin: 5px; background: #d4a574; border: none; border-radius: 5px; cursor: pointer; color: #1a1814; font-weight: bold;">
+            Tab 2
+        </button>
+        <button class="test-tab" data-tab="3" style="padding: 10px 20px; margin: 5px; background: #d4a574; border: none; border-radius: 5px; cursor: pointer; color: #1a1814; font-weight: bold;">
+            Tab 3
+        </button>
+        <div id="test-result" style="margin-top: 20px; padding: 10px; background: rgba(0,0,0,0.3);">
+            点击上面的tab测试
+        </div>
+    </div>
+
+    <script>
+        const debug = document.getElementById('debug');
+
+        function log(msg) {
+            const div = document.createElement('div');
+            div.textContent = msg;
+            debug.appendChild(div);
+            console.log(msg);
+        }
+
+        log('页面开始加载...');
+
+        // 测试基础点击
+        document.querySelectorAll('.test-tab').forEach(tab => {
+            tab.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const tabNum = this.getAttribute('data-tab');
+                document.getElementById('test-result').innerHTML = `✅ 点击了 Tab ${tabNum}！`;
+                log(`✅ 手动tab点击: Tab ${tabNum}`);
+            });
+            log('已绑定: ' + tab.textContent);
+        });
+
+        log('✅ 手动tab已设置');
+
+        // 加载travel-gallery.js
+        log('开始加载travel-gallery.js...');
+
+        const script = document.createElement('script');
+        script.src = 'travel-gallery.js';
+        script.onload = function() {
+            log('✅ travel-gallery.js加载完成');
+
+            setTimeout(() => {
+                // 检查画廊是否创建
+                const gallery = document.getElementById('travel-gallery');
+                if (gallery) {
+                    log('✅ 画廊容器已创建');
+
+                    // 检查tab
+                    const tabs = gallery.querySelectorAll('.travel-tab');
+                    log(`找到 ${tabs.length} 个travel-tab`);
+
+                    if (tabs.length > 0) {
+                        const firstTab = tabs[0];
+                        const rect = firstTab.getBoundingClientRect();
+
+                        log(`第一个tab: "${firstTab.textContent}"`);
+                        log(`位置: ${Math.round(rect.left)}, ${Math.round(rect.top)}`);
+                        log(`大小: ${Math.round(rect.width)} x ${Math.round(rect.height)}`);
+                        log(`可见: ${rect.width > 0 && rect.height > 0}`);
+
+                        // 检查样式
+                        const styles = window.getComputedStyle(firstTab);
+                        log(`pointer-events: ${styles.pointerEvents}`);
+                        log(`cursor: ${styles.cursor}`);
+                        log(`display: ${styles.display}`);
+                        log(`z-index: ${styles.zIndex}`);
+
+                        // 尝试点击
+                        log('尝试自动点击第一个tab...');
+                        try {
+                            firstTab.click();
+                            log('✅ 自动点击成功！');
+                        } catch (e) {
+                            log('❌ 自动点击失败: ' + e.message);
+                        }
+
+                    } else {
+                        log('❌ 未找到travel-tab');
+                    }
+
+                } else {
+                    log('❌ 画廊容器未创建');
+                    log('可能原因: travel-data.json加载失败');
+                }
+            }, 2000);
+        };
+
+        script.onerror = function() {
+            log('❌ travel-gallery.js加载失败');
+        };
+
+        document.head.appendChild(script);
+
+        // 全局点击监听
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('travel-tab') || e.target.classList.contains('location-tab')) {
+                log(`🎯 点击了: ${e.target.textContent} (${e.target.className})`);
+            }
+        }, true);
+
+        log('页面脚本初始化完成');
+    </script>
+</body>
+</html>

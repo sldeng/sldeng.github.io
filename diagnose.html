@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诊断工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #58a6ff;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #c9d1d9;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 8px 0;
+            background: #0d1117;
+            border-radius: 4px;
+        }
+
+        .check-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+        }
+
+        .check-icon.pass {
+            background: #238636;
+            color: white;
+        }
+
+        .check-icon.fail {
+            background: #da3633;
+            color: white;
+        }
+
+        .check-icon.warn {
+            background: #d29922;
+            color: white;
+        }
+
+        .check-text {
+            flex: 1;
+        }
+
+        .check-detail {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #238636;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #2ea043;
+        }
+
+        button.secondary {
+            background: #30363d;
+        }
+
+        button.secondary:hover {
+            background: #3c444d;
+        }
+
+        .url-display {
+            background: #0d1117;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            word-break: break-all;
+            margin-top: 10px;
+        }
+
+        .console-output {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .console-line {
+            padding: 2px 0;
+        }
+
+        .console-line.error {
+            color: #ff7b72;
+        }
+
+        .console-line.success {
+            color: #3fb950;
+        }
+
+        .console-line.info {
+            color: #58a6ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 旅行画廊诊断工具</h1>
+        <p class="subtitle">帮助你快速定位问题</p>
+
+        <div class="section">
+            <div class="section-title">📋 基础检查</div>
+            <div id="basic-checks"></div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🌐 网络检查</div>
+            <div id="network-checks"></div>
+            <div class="button-group">
+                <button onclick="runNetworkChecks()">重新检查</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🖼️ 画廊状态</div>
+            <div id="gallery-checks"></div>
+            <div class="button-group">
+                <button onclick="runGalleryChecks()">检查画廊</button>
+                <button class="secondary" onclick="testTabClick()">测试点击</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">💻 控制台输出</div>
+            <div class="console-output" id="console"></div>
+            <div class="button-group">
+                <button class="secondary" onclick="clearConsole()">清除</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">🔧 快速修复</div>
+            <div class="button-group">
+                <button onclick="window.location.href='/simple-test.html'">打开测试页面</button>
+                <button onclick="window.location.href='/debug-inline.html'">打开内联测试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const consoleDiv = document.getElementById('console');
+
+        function log(msg, type = '') {
+            const line = document.createElement('div');
+            line.className = `console-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            consoleDiv.appendChild(line);
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        function clearConsole() {
+            consoleDiv.innerHTML = '';
+        }
+
+        function createCheckItem(icon, text, detail = '') {
+            return `
+                <div class="check-item">
+                    <div class="check-icon ${icon.class}">${icon.text}</div>
+                    <div class="check-text">
+                        <div>${text}</div>
+                        ${detail ? `<div class="check-detail">${detail}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 基础检查
+        function runBasicChecks() {
+            const container = document.getElementById('basic-checks');
+            const checks = [];
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+
+            // 检查协议
+            if (protocol === 'https:' || protocol === 'http:') {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    '使用HTTP/HTTPS协议',
+                    `当前: ${protocol}//`
+                ));
+            } else {
+                checks.push(createCheckItem(
+                    { text: '✗', class: 'fail' },
+                    '未使用HTTP协议',
+                    `当前: ${protocol}// - 请使用HTTP服务器`
+                ));
+            }
+
+            // 检查是否为localhost
+            if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    '本地服务器',
+                    hostname
+                ));
+            } else if (hostname.includes('github.io')) {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    'GitHub Pages',
+                    hostname
+                ));
+            } else {
+                checks.push(createCheckItem(
+                    { text: '⚠', class: 'warn' },
+                    '服务器',
+                    hostname
+                ));
+            }
+
+            container.innerHTML = checks.join('');
+        }
+
+        // 网络检查
+        async function runNetworkChecks() {
+            const container = document.getElementById('network-checks');
+            container.innerHTML = '<p style="color: #8b949e;">检查中...</p>';
+
+            const files = [
+                { name: 'travel-gallery.css', path: 'travel-gallery.css' },
+                { name: 'travel-gallery.js', path: 'travel-gallery.js' },
+                { name: 'travel-data.json', path: 'travel-data.json' },
+                { name: '故宫/images.json', path: '北京行/故宫/images.json' }
+            ];
+
+            const results = [];
+
+            for (const file of files) {
+                try {
+                    const response = await fetch(file.path);
+                    if (response.ok) {
+                        results.push(createCheckItem(
+                            { text: '✓', class: 'pass' },
+                            file.name,
+                            `HTTP ${response.status}`
+                        ));
+                        log(`✓ ${file.name} 加载成功`, 'success');
+                    } else {
+                        results.push(createCheckItem(
+                            { text: '✗', class: 'fail' },
+                            file.name,
+                            `HTTP ${response.status}`
+                        ));
+                        log(`✗ ${file.name} 加载失败: ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    results.push(createCheckItem(
+                        { text: '✗', class: 'fail' },
+                        file.name,
+                        error.message
+                    ));
+                    log(`✗ ${file.name} 网络错误: ${error.message}`, 'error');
+                }
+            }
+
+            container.innerHTML = results.join('');
+        }
+
+        // 画廊检查
+        function runGalleryChecks() {
+            const container = document.getElementById('gallery-checks');
+            const checks = [];
+
+            // 检查CSS加载
+            const cssLink = document.querySelector('link[href="travel-gallery.css"]');
+            if (cssLink) {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    'CSS已加载'
+                ));
+            } else {
+                checks.push(createCheckItem(
+                    { text: '✗', class: 'fail' },
+                    'CSS未加载'
+                ));
+            }
+
+            // 检查JS类
+            if (typeof TravelGallery !== 'undefined') {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    'TravelGallery类已定义'
+                ));
+            } else {
+                checks.push(createCheckItem(
+                    { text: '✗', class: 'fail' },
+                    'TravelGallery类未定义'
+                ));
+            }
+
+            // 检查实例
+            if (window.travelGallery) {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    '画廊实例已创建'
+                ));
+            } else {
+                checks.push(createCheckItem(
+                    { text: '✗', class: 'fail' },
+                    '画廊实例未创建'
+                ));
+            }
+
+            // 检查DOM元素
+            const gallery = document.getElementById('travel-gallery');
+            if (gallery) {
+                checks.push(createCheckItem(
+                    { text: '✓', class: 'pass' },
+                    '画廊DOM元素已创建'
+                ));
+
+                const tabs = gallery.querySelectorAll('.travel-tab');
+                checks.push(createCheckItem(
+                    { text: tabs.length > 0 ? '✓' : '✗', class: tabs.length > 0 ? 'pass' : 'fail' },
+                    `旅行Tab (${tabs.length}个)`
+                ));
+
+                if (tabs.length > 0) {
+                    const firstTab = tabs[0];
+                    const styles = window.getComputedStyle(firstTab);
+                    const pointerEvents = styles.pointerEvents;
+                    const cursor = styles.cursor;
+
+                    if (pointerEvents === 'auto' && cursor === 'pointer') {
+                        checks.push(createCheckItem(
+                            { text: '✓', class: 'pass' },
+                            'Tab样式正确',
+                            `pointer-events: ${pointerEvents}, cursor: ${cursor}`
+                        ));
+                    } else {
+                        checks.push(createCheckItem(
+                            { text: '✗', class: 'fail' },
+                            'Tab样式异常',
+                            `pointer-events: ${pointerEvents}, cursor: ${cursor}`
+                        ));
+                    }
+                }
+            } else {
+                checks.push(createCheckItem(
+                    { text: '✗', class: 'fail' },
+                    '画廊DOM元素未创建'
+                ));
+            }
+
+            container.innerHTML = checks.join('');
+        }
+
+        // 测试点击
+        function testTabClick() {
+            const gallery = document.getElementById('travel-gallery');
+            if (!gallery) {
+                log('✗ 画廊未创建，无法测试点击', 'error');
+                return;
+            }
+
+            const firstTab = gallery.querySelector('.travel-tab');
+            if (!firstTab) {
+                log('✗ 未找到Tab按钮', 'error');
+                return;
+            }
+
+            log(`尝试点击: ${firstTab.textContent}`, 'info');
+            try {
+                firstTab.click();
+                log('✓ 点击成功！查看控制台是否有响应', 'success');
+            } catch (e) {
+                log(`✗ 点击失败: ${e.message}`, 'error');
+            }
+        }
+
+        // 初始化
+        window.addEventListener('load', () => {
+            log('诊断工具加载完成', 'success');
+            log(`当前URL: ${window.location.href}`, 'info');
+            runBasicChecks();
+
+            // 延迟执行网络检查
+            setTimeout(runNetworkChecks, 500);
+
+            // 监听画廊创建
+            setTimeout(() => {
+                if (window.travelGallery) {
+                    log('检测到travelGallery实例', 'success');
+                    runGalleryChecks();
+                } else {
+                    log('未检测到travelGallery实例', 'error');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

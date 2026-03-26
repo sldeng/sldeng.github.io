@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>画廊测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1814;
+            color: #f5f0e8;
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            background: #d4a574;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-button:hover {
+            background: #c9a86c;
+        }
+        #log {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #d4a574;
+            padding-left: 10px;
+        }
+        .success { border-left-color: #4caf50; }
+        .error { border-left-color: #f44336; }
+        .warning { border-left-color: #ff9800; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 旅行画廊测试页面</h1>
+
+        <div>
+            <button class="test-button" onclick="testCSS()">测试CSS</button>
+            <button class="test-button" onclick="testJS()">测试JavaScript</button>
+            <button class="test-button" onclick="testJSON()">测试JSON</button>
+            <button class="test-button" onclick="testClick()">测试点击</button>
+            <button class="test-button" onclick="clearLog()">清除日志</button>
+        </div>
+
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testCSS() {
+            log('测试CSS加载...', 'info');
+
+            const link = document.querySelector('link[href="travel-gallery.css"]');
+            if (link) {
+                log('✅ CSS链接已找到', 'success');
+                fetch('travel-gallery.css')
+                    .then(r => {
+                        if (r.ok) {
+                            log('✅ CSS文件可以访问', 'success');
+                        } else {
+                            log('❌ CSS文件无法访问: ' + r.status, 'error');
+                        }
+                    })
+                    .catch(e => log('❌ CSS加载失败: ' + e.message, 'error'));
+            } else {
+                log('❌ CSS链接未找到', 'error');
+            }
+        }
+
+        function testJS() {
+            log('测试JavaScript加载...', 'info');
+
+            if (window.TravelGallery) {
+                log('✅ TravelGallery类已定义', 'success');
+            } else {
+                log('❌ TravelGallery类未定义', 'error');
+            }
+
+            if (window.travelGallery) {
+                log('✅ travelGallery实例已创建', 'success');
+            } else {
+                log('⚠️ travelGallery实例未创建（可能正在初始化）', 'warning');
+            }
+        }
+
+        function testJSON() {
+            log('测试travel-data.json加载...', 'info');
+
+            fetch('travel-data.json')
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
+                .then(data => {
+                    log('✅ JSON加载成功', 'success');
+                    log(`   包含 ${data.travels.length} 个旅行:`, 'info');
+                    data.travels.forEach((t, i) => {
+                        log(`   [${i}] ${t.name} - ${t.locations.length} 个地点`, 'info');
+                    });
+                })
+                .catch(e => {
+                    log('❌ JSON加载失败: ' + e.message, 'error');
+                    log('   提示: 如果使用file://协议，请改用HTTP服务器', 'warning');
+                });
+        }
+
+        function testClick() {
+            log('测试按钮点击...', 'info');
+
+            const tabs = document.querySelectorAll('.travel-tab, .location-tab');
+            if (tabs.length > 0) {
+                log(`找到 ${tabs.length} 个tab按钮`, 'info');
+                tabs.forEach((tab, i) => {
+                    const rect = tab.getBoundingClientRect();
+                    log(`Tab ${i}: "${tab.textContent}"`, 'info');
+                    log(`  位置: ${Math.round(rect.left)},${Math.round(rect.top)} 大小: ${Math.round(rect.width)}x${Math.round(rect.height)}`, 'info');
+
+                    const styles = window.getComputedStyle(tab);
+                    log(`  pointer-events: ${styles.pointerEvents}`, 'info');
+                    log(`  cursor: ${styles.cursor}`, 'info');
+                    log(`  z-index: ${styles.zIndex}`, 'info');
+
+                    if (styles.pointerEvents === 'none') {
+                        log('  ❌ 此按钮无法点击！', 'error');
+                    }
+                });
+
+                // 尝试点击第一个按钮
+                if (tabs[0]) {
+                    log('尝试点击第一个按钮...', 'info');
+                    try {
+                        tabs[0].click();
+                        log('✅ 点击成功！', 'success');
+                    } catch (e) {
+                        log('❌ 点击失败: ' + e.message, 'error');
+                    }
+                }
+            } else {
+                log('❌ 未找到任何tab按钮', 'error');
+                log('提示: 画廊可能尚未初始化', 'warning');
+            }
+        }
+
+        // 页面加载后自动运行测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('=== 自动测试开始 ===', 'info');
+                testCSS();
+                setTimeout(() => testJS(), 500);
+                setTimeout(() => testJSON(), 1000);
+            }, 1000);
+        });
+    </script>
+
+    <!-- 这里加载实际的画廊文件 -->
+    <link rel="stylesheet" href="travel-gallery.css">
+    <script src="travel-gallery.js"></script>
+</body>
+</html>

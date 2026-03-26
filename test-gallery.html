@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试旅行画廊</title>
+    <link rel="stylesheet" href="travel-gallery.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1814;
+            color: #f5f0e8;
+            font-family: Arial, sans-serif;
+        }
+        .test-info {
+            padding: 20px;
+            background: rgba(212, 165, 116, 0.1);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .test-info h2 {
+            margin: 0 0 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h2>旅行画廊测试页面</h2>
+        <p>如果看到下面的tab按钮，说明画廊已正确加载</p>
+        <p id="status">正在初始化...</p>
+    </div>
+
+    <script>
+        // 添加调试信息
+        console.log('测试页面加载完成');
+        document.getElementById('status').textContent = '脚本加载中...';
+    </script>
+
+    <script src="travel-gallery.js"></script>
+
+    <script>
+        // 监听画廊初始化
+        setTimeout(() => {
+            const statusEl = document.getElementById('status');
+            const gallery = document.getElementById('travel-gallery');
+
+            if (gallery) {
+                statusEl.innerHTML = '✅ 画廊已创建！<br>请检查下面是否有tab按钮';
+                console.log('画廊元素已找到:', gallery);
+            } else {
+                statusEl.innerHTML = '❌ 画廊未创建<br>请检查控制台错误';
+                console.error('画廊元素未找到');
+            }
+
+            // 检查按钮
+            const tabs = document.querySelectorAll('.travel-tab');
+            console.log('找到的tab按钮数量:', tabs.length);
+            tabs.forEach((tab, i) => {
+                console.log(`Tab ${i}:`, tab.textContent, '可点击:', tab.style.pointerEvents !== 'none');
+            });
+        }, 2000);
+    </script>
+</body>
+</html>
