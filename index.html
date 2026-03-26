@@ -86,6 +86,89 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
         }
 
+        /* 闪瞎狗眼效果 */
+        .blind-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none !important;
+            overflow: hidden;
+        }
+
+        .flash-star {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: flash 0.1s ease-in-out infinite;
+        }
+
+        @keyframes flash {
+            0%, 100% { opacity: 0.2; transform: scale(1); box-shadow: 0 0 0 transparent; }
+            50% { opacity: 1; transform: scale(2); box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff00de, 0 0 40px #ff00de; }
+        }
+
+        .rainbow-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none !important;
+            background: linear-gradient(
+                45deg,
+                #ff0000, #ff7300, #fffb00, #48ff00,
+                #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000
+            );
+            background-size: 400% 400%;
+            animation: rainbow-flow 3s ease infinite;
+            opacity: 0.15;
+        }
+
+        @keyframes rainbow-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glow-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: glow-float 4s ease-in-out infinite;
+        }
+
+        @keyframes glow-float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.3;
+                filter: hue-rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) scale(1.5);
+                opacity: 1;
+                filter: hue-rotate(180deg);
+            }
+        }
+
+        .laser-beam {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, #ff00ff, #00ffff, transparent);
+            animation: laser-sweep 2s linear infinite;
+            opacity: 0.8;
+            filter: blur(1px);
+        }
+
+        @keyframes laser-sweep {
+            0% { transform: translateX(-100%) rotate(0deg); }
+            100% { transform: translateX(100vw) rotate(360deg); }
+        }
+
         /* Header */
         .header {
             position: relative;
@@ -111,11 +194,26 @@
             font-weight: 300;
             letter-spacing: 20px;
             margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--light) 0%, var(--primary) 50%, var(--accent) 100%);
+            background: linear-gradient(135deg, #fff 0%, #ff00de 25%, #00ffff 50%, #fffb00 75%, #fff 100%);
+            background-size: 200% auto;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 60px rgba(212, 165, 116, 0.3);
+            animation: title-shine 2s linear infinite, neon-pulse 0.5s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 10px #ff00de) drop-shadow(0 0 20px #00ffff) drop-shadow(0 0 30px #ff00de);
+        }
+
+        @keyframes title-shine {
+            to { background-position: 200% center; }
+        }
+
+        @keyframes neon-pulse {
+            from {
+                filter: drop-shadow(0 0 5px #ff00de) drop-shadow(0 0 10px #00ffff);
+            }
+            to {
+                filter: drop-shadow(0 0 20px #ff00de) drop-shadow(0 0 40px #00ffff) drop-shadow(0 0 60px #ff00de);
+            }
         }
 
         .header-quote {
@@ -170,7 +268,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(212, 165, 116, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 222, 0.5), rgba(0, 255, 255, 0.5), transparent);
             transition: left 0.6s ease;
         }
 
@@ -178,14 +276,42 @@
             left: 100%;
         }
 
+        .album-btn::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #ff00de, #00ffff, #fffb00, #ff00de);
+            background-size: 400% 400%;
+            border-radius: inherit;
+            z-index: -1;
+            opacity: 0;
+            animation: border-flow 3s ease infinite;
+            transition: opacity 0.3s ease;
+        }
+
+        @keyframes border-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         .album-btn:hover,
         .album-btn.active {
-            border-color: var(--primary);
-            background: rgba(212, 165, 116, 0.1);
+            border-color: transparent;
+            background: rgba(26, 24, 20, 0.8);
             transform: translateY(-3px);
             box-shadow:
-                0 10px 40px rgba(212, 165, 116, 0.2),
-                0 0 60px rgba(212, 165, 116, 0.1);
+                0 10px 40px rgba(255, 0, 222, 0.3),
+                0 0 60px rgba(0, 255, 255, 0.2),
+                0 0 100px rgba(255, 251, 0, 0.1);
+        }
+
+        .album-btn:hover::after,
+        .album-btn.active::after {
+            opacity: 1;
         }
 
         .album-btn .btn-icon {
@@ -325,9 +451,30 @@
             transform: translateY(-15px) rotate(0deg) scale(1.03);
             box-shadow:
                 0 25px 60px rgba(0, 0, 0, 0.4),
-                0 0 0 1px rgba(212, 165, 116, 0.3),
-                0 0 80px rgba(212, 165, 116, 0.15);
+                0 0 0 2px rgba(255, 0, 222, 0.5),
+                0 0 20px rgba(255, 0, 222, 0.3),
+                0 0 40px rgba(0, 255, 255, 0.2),
+                0 0 80px rgba(255, 251, 0, 0.1);
             z-index: 10;
+            animation: card-glow 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes card-glow {
+            from {
+                box-shadow:
+                    0 25px 60px rgba(0, 0, 0, 0.4),
+                    0 0 0 2px rgba(255, 0, 222, 0.5),
+                    0 0 20px rgba(255, 0, 222, 0.3),
+                    0 0 40px rgba(0, 255, 255, 0.2);
+            }
+            to {
+                box-shadow:
+                    0 25px 60px rgba(0, 0, 0, 0.4),
+                    0 0 0 2px rgba(0, 255, 255, 0.5),
+                    0 0 20px rgba(0, 255, 255, 0.3),
+                    0 0 40px rgba(255, 251, 0, 0.2),
+                    0 0 60px rgba(255, 0, 222, 0.1);
+            }
         }
 
         .photo-card-inner {
@@ -602,410 +749,16 @@
     <link rel="stylesheet" href="travel-gallery.css">
 </head>
 <body>
+    <div class="rainbow-bg"></div>
     <div class="bg-gradient"></div>
     <div class="particles" id="particles"></div>
     <div class="grain-overlay"></div>
+    <div class="blind-overlay" id="blind-overlay"></div>
 
-    <header class="header">
-        <div class="header-subtitle">Travel Memories</div>
-        <h1>拾光</h1>
-        <p class="header-quote">走过的路 遇见的光 收藏的时光</p>
-    </header>
 
-    <nav class="album-nav">
-        <button class="album-btn active" data-album="beijing">
-            <span class="btn-icon">🏛️</span>
-            <span class="btn-text">北京</span>
-        </button>
-        <button class="album-btn" data-album="huangshan">
-            <span class="btn-icon">⛰️</span>
-            <span class="btn-text">黄山</span>
-        </button>
-    </nav>
+    
 
-    <div class="container">
-        <!-- 北京相册 -->
-        <div class="album active" id="beijing">
-            <h2 class="album-title">北京记忆</h2>
 
-            <div class="section">
-                <h3 class="section-title">故宫红墙</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.05s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/故宫/IMG_5040.jpg" alt="故宫" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.1s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/故宫/IMG_5041.jpg" alt="故宫" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.15s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/故宫/IMG_5042.jpg" alt="故宫" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title">长城烽烟</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.05s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/长城/IMG_4915.jpg" alt="长城" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title">鼓楼暮色</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.05s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/鼓楼&北海公园/831677119165_.pic.jpg" alt="鼓楼北海公园" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.1s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/鼓楼&北海公园/841677119165_.pic.jpg" alt="鼓楼北海公园" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.15s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/鼓楼&北海公园/851677119165_.pic.jpg" alt="鼓楼北海公园" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.2s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/鼓楼&北海公园/861677119165_.pic.jpg" alt="鼓楼北海公园" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.25s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/鼓楼&北海公园/871677119165_.pic.jpg" alt="鼓楼北海公园" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title">时光剪影</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.03s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG389.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.06s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG390.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.09s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG392.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.12s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG393.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.15s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG394.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.18s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG395.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.21s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG396.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.24s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG406.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.27s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG407.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.3s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG408.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.33s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG409.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.36s">
-                        <div class="photo-card-inner">
-                            <img src="北京行/her/WechatIMG410.jpeg" alt="" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 黄山相册 -->
-        <div class="album" id="huangshan">
-            <h2 class="album-title">黄山印象</h2>
-
-            <div class="section">
-                <h3 class="section-title">云海奇峰</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.02s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26425.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.04s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26427.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.06s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26428.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.08s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26429.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.1s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26430.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.12s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26431.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.14s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26441.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.16s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26442.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.18s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26443.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.2s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26444.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.22s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26445.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.24s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26446.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.26s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26448.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.28s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26449.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.3s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26450.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.32s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26451.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.34s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26452.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.36s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26453.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.38s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26454.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.4s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26456.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.42s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26457.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.44s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26458.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.46s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26460.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.48s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26462.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.5s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26463.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.52s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26464.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.54s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26465.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.56s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26466.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.58s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26467.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.6s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26470.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.62s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/黄山风景区/WechatIMG26471.jpg" alt="黄山" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section">
-                <h3 class="section-title">水墨宏村</h3>
-                <div class="gallery">
-                    <div class="photo-card" style="animation-delay: 0.03s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26474.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.06s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26475.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.09s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26476.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.12s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26478.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.15s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26479.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.18s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26480.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.21s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26481.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.24s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26482.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.27s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26483.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.3s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26484.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.33s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26485.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.36s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26486.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.39s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26487.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                    <div class="photo-card" style="animation-delay: 0.42s">
-                        <div class="photo-card-inner">
-                            <img src="黄山行/宏村/WechatIMG26488.jpg" alt="宏村" loading="lazy">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="footer">
-        <div class="footer-divider"></div>
-        <p class="footer-text">75 张照片 · 一段旅程</p>
-        <p style="margin-top: 20px; font-size: 0.75rem; letter-spacing: 3px; opacity: 0.3;">二〇二三 · 二〇二四</p>
-    </footer>
 
     <!-- Lightbox -->
     <div class="lightbox" id="lightbox">
@@ -1034,6 +787,51 @@
             }
         }
         createParticles();
+
+        // 闪瞎狗眼效果
+        function createBlindEffect() {
+            const container = document.getElementById('blind-overlay');
+
+            // 创建闪烁星星
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.className = 'flash-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                star.style.animationDuration = (0.05 + Math.random() * 0.1) + 's';
+                container.appendChild(star);
+            }
+
+            // 创建发光粒子
+            const colors = ['#ff006e', '#8338ec', '#3a86ff', '#06ffa5', '#ffbe0b', '#ff5400'];
+            for (let i = 0; i < 30; i++) {
+                const glow = document.createElement('div');
+                glow.className = 'glow-particle';
+                glow.style.left = Math.random() * 100 + '%';
+                glow.style.top = Math.random() * 100 + '%';
+                const size = 5 + Math.random() * 20;
+                glow.style.width = size + 'px';
+                glow.style.height = size + 'px';
+                glow.style.background = colors[Math.floor(Math.random() * colors.length)];
+                glow.style.animationDelay = Math.random() * 4 + 's';
+                glow.style.animationDuration = (3 + Math.random() * 3) + 's';
+                glow.style.boxShadow = `0 0 ${size}px ${size/2}px ${glow.style.background}`;
+                container.appendChild(glow);
+            }
+
+            // 创建激光束
+            for (let i = 0; i < 5; i++) {
+                const laser = document.createElement('div');
+                laser.className = 'laser-beam';
+                laser.style.top = (20 + i * 15) + '%';
+                laser.style.width = (100 + Math.random() * 200) + 'px';
+                laser.style.animationDelay = Math.random() * 2 + 's';
+                laser.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
+                container.appendChild(laser);
+            }
+        }
+        createBlindEffect();
 
         // Album switching
         const albumBtns = document.querySelectorAll('.album-btn');
