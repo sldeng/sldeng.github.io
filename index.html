@@ -41,7 +41,7 @@
                 radial-gradient(ellipse at 80% 20%, rgba(201, 168, 108, 0.1) 0%, transparent 50%),
                 radial-gradient(ellipse at 50% 50%, rgba(212, 165, 116, 0.05) 0%, transparent 70%);
             z-index: 0;
-            pointer-events: none;
+            pointer-events: none !important;
         }
 
         /* Floating Particles */
@@ -52,7 +52,7 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            pointer-events: none;
+            pointer-events: none !important;
             overflow: hidden;
         }
 
@@ -82,7 +82,7 @@
             height: 100%;
             opacity: 0.03;
             z-index: 1000;
-            pointer-events: none;
+            pointer-events: none !important;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
         }
 
@@ -160,6 +160,7 @@
             cursor: pointer;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            pointer-events: auto !important;
         }
 
         .album-btn::before {
@@ -294,6 +295,7 @@
                 0 4px 20px rgba(0, 0, 0, 0.3),
                 0 0 0 1px rgba(212, 165, 116, 0.1);
             animation: card-reveal 0.8s ease-out backwards;
+            pointer-events: auto !important;
         }
 
         .photo-card:nth-child(odd) {
@@ -445,11 +447,13 @@
             align-items: center;
             opacity: 0;
             transition: opacity 0.4s ease;
+            pointer-events: none;
         }
 
         .lightbox.active {
             display: flex;
             opacity: 1;
+            pointer-events: auto;
         }
 
         .lightbox-content {
@@ -594,6 +598,7 @@
             .lightbox-next { right: 20px; }
         }
     </style>
+    <link rel="stylesheet" href="click-fix.css">
     <link rel="stylesheet" href="travel-gallery.css">
 </head>
 <body>
@@ -1064,16 +1069,49 @@
 
         photoCards.forEach((card) => {
             card.addEventListener('click', () => {
+                // 获取当前活动相册的所有图片
                 currentAlbumImages = Array.from(document.querySelectorAll('.album.active .photo-card img'));
-                currentIndex = currentAlbumImages.findIndex(img => img.src === card.querySelector('img').src);
+
+                // 检查是否找到图片
+                if (currentAlbumImages.length === 0) {
+                    console.warn('当前相册没有图片');
+                    return;
+                }
+
+                // 找到被点击图片的索引
+                const clickedImg = card.querySelector('img');
+                currentIndex = currentAlbumImages.findIndex(img => img.src === clickedImg.src);
+
+                // 如果找不到，使用第一张图片
+                if (currentIndex === -1) {
+                    console.warn('未找到被点击的图片，使用第一张');
+                    currentIndex = 0;
+                }
+
                 updateLightboxImage();
                 lightbox.classList.add('active');
             });
         });
 
         function updateLightboxImage() {
-            lightboxImg.src = currentAlbumImages[currentIndex].src;
-            lightboxCounter.textContent = `${currentIndex + 1} / ${currentAlbumImages.length}`;
+            // 安全检查：确保有图片且索引有效
+            if (!currentAlbumImages || currentAlbumImages.length === 0) {
+                console.warn('没有可显示的图片');
+                return;
+            }
+
+            // 确保索引在有效范围内
+            if (currentIndex < 0 || currentIndex >= currentAlbumImages.length) {
+                currentIndex = 0;
+            }
+
+            const img = currentAlbumImages[currentIndex];
+            if (img && img.src) {
+                lightboxImg.src = img.src;
+                lightboxCounter.textContent = `${currentIndex + 1} / ${currentAlbumImages.length}`;
+            } else {
+                console.warn('图片对象无效:', img);
+            }
         }
 
         document.querySelector('.lightbox-close').addEventListener('click', () => {
@@ -1142,6 +1180,60 @@
             bgGradient.style.transform = `translateY(${scrolled * 0.3}px)`;
         });
     </script>
+
+    <!-- 旅行画廊调试工具 -->
+    <script>
+    (function() {
+        console.log('🔍 画廊调试工具已加载');
+
+        // 检查画廊状态
+        function checkGalleryStatus() {
+            console.log('=== 画廊状态检查 ===');
+
+            // 1. 检查文件加载
+            const cssLoaded = !!document.querySelector('link[href="travel-gallery.css"]');
+            const jsLoaded = typeof TravelGallery !== 'undefined';
+            const instanceExists = typeof window.travelGallery !== 'undefined';
+
+            console.log('CSS加载:', cssLoaded ? '✅' : '❌');
+            console.log('JS类定义:', jsLoaded ? '✅' : '❌');
+            console.log('实例存在:', instanceExists ? '✅' : '❌');
+
+            // 2. 检查DOM元素
+            const gallery = document.getElementById('travel-gallery');
+            if (gallery) {
+                console.log('✅ 画廊DOM已创建');
+
+                const tabs = gallery.querySelectorAll('.travel-tab');
+                console.log(`找到 ${tabs.length} 个旅行tab`);
+
+                tabs.forEach((tab, i) => {
+                    const rect = tab.getBoundingClientRect();
+                    const visible = rect.width > 0 && rect.height > 0;
+                    const styles = window.getComputedStyle(tab);
+
+                    console.log(`Tab ${i} "${tab.textContent}":`, {
+                        可见: visible ? '✅' : '❌',
+                        pointerEvents: styles.pointerEvents,
+                        cursor: styles.cursor
+                    });
+                });
+            } else {
+                console.log('❌ 画廊DOM未创建');
+            }
+
+            console.log('==================');
+        }
+
+        // 延迟检查
+        setTimeout(checkGalleryStatus, 2000);
+        setTimeout(checkGalleryStatus, 5000);
+
+        // 暴露到全局
+        window.checkGallery = checkGalleryStatus;
+    })();
+    </script>
+
     <script src="travel-gallery.js"></script>
 </body>
 </html>

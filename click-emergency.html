@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紧急诊断</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1814;
+            color: #f5f0e8;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .test-section {
+            background: rgba(212, 165, 116, 0.1);
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #d4a574;
+            border-radius: 10px;
+        }
+
+        .big-button {
+            padding: 30px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #d4a574;
+            color: #1a1814;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+            z-index: 999999 !important;
+            position: relative !important;
+        }
+
+        .big-button:hover {
+            background: #c9a86c;
+            transform: scale(1.05);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 5px;
+            font-family: monospace;
+        }
+
+        .success { color: #4caf50; font-size: 20px; font-weight: bold; }
+        .error { color: #f44336; font-size: 20px; font-weight: bold; }
+
+        .overlay-test {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            border: 5px solid red;
+            z-index: 999998;
+        }
+
+        #click-log {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.9);
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 400px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            z-index: 999999;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay-test"></div>
+
+    <div id="click-log">
+        <div style="font-weight: bold; margin-bottom: 10px;">点击日志:</div>
+        <div id="log-content"></div>
+    </div>
+
+    <h1>🚨 紧急点击诊断</h1>
+
+    <div class="test-section">
+        <h2>测试1: 基础点击</h2>
+        <p>点击下面的按钮，应该看到提示</p>
+        <button class="big-button" onclick="test1()">测试按钮1</button>
+        <button class="big-button" onclick="test2()">测试按钮2</button>
+        <div class="result" id="result1"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试2: 事件监听器</h2>
+        <p>使用addEventListener的按钮</p>
+        <button class="big-button" id="btn3">测试按钮3</button>
+        <button class="big-button" id="btn4">测试按钮4</button>
+        <div class="result" id="result2"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试3: 检查覆盖层</h2>
+        <p>红色边框框住了整个页面（但不应阻挡点击）</p>
+        <button class="big-button" onclick="checkOverlays()">检查覆盖层</button>
+        <div class="result" id="result3"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试4: 加载原页面样式</h2>
+        <button class="big-button" onclick="loadOriginalCSS()">加载index.html的CSS</button>
+        <div class="result" id="result4"></div>
+    </div>
+
+    <script>
+        const logContent = document.getElementById('log-content');
+
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.textContent = `[${time}] ${msg}`;
+            logContent.appendChild(div);
+            logContent.scrollTop = logContent.scrollHeight;
+            console.log(msg);
+        }
+
+        // 测试1: onclick属性
+        function test1() {
+            log('✅ 按钮1点击成功！');
+            document.getElementById('result1').innerHTML = '<span class="success">✅ onclick属性工作正常</span>';
+        }
+
+        function test2() {
+            log('✅ 按钮2点击成功！');
+            document.getElementById('result1').innerHTML += '<br><span class="success">✅ 多个onclick都工作</span>';
+        }
+
+        // 测试2: addEventListener
+        document.getElementById('btn3').addEventListener('click', function() {
+            log('✅ 按钮3点击成功！');
+            document.getElementById('result2').innerHTML = '<span class="success">✅ addEventListener工作正常</span>';
+        });
+
+        document.getElementById('btn4').addEventListener('click', function(e) {
+            e.preventDefault();
+            log('✅ 按钮4点击成功！');
+            document.getElementById('result2').innerHTML += '<br><span class="success">✅ preventDefault也工作</span>';
+        });
+
+        // 测试3: 检查覆盖层
+        function checkOverlays() {
+            const result = [];
+            const overlays = document.querySelectorAll('*');
+            let blockingCount = 0;
+
+            log('开始检查覆盖层...');
+
+            overlays.forEach(el => {
+                const styles = window.getComputedStyle(el);
+                const pos = styles.position;
+                const zIndex = styles.zIndex;
+                const pointerEvents = styles.pointerEvents;
+                const display = styles.display;
+                const rect = el.getBoundingClientRect();
+
+                // 检查固定定位且覆盖全屏的元素
+                if (pos === 'fixed' && rect.width > 100 && rect.height > 100) {
+                    const info = {
+                        tag: el.tagName,
+                        id: el.id,
+                        class: el.className,
+                        zIndex: zIndex,
+                        pointerEvents: pointerEvents,
+                        width: Math.round(rect.width),
+                        height: Math.round(rect.height)
+                    };
+
+                    if (pointerEvents !== 'none' && display !== 'none') {
+                        blockingCount++;
+                        result.push('⚠️ 可能阻挡: ' + JSON.stringify(info));
+                    }
+
+                    log(`元素: ${el.tagName}${el.id ? '#' + el.id : ''}${el.className ? '.' + el.className : ''} - z-index: ${zIndex}, pointer-events: ${pointerEvents}`);
+                }
+            });
+
+            let output = `找到 ${blockingCount} 个可能阻挡点击的元素\n\n`;
+            output += result.slice(0, 5).join('\n');
+
+            if (blockingCount === 0) {
+                document.getElementById('result3').innerHTML = '<span class="success">✅ 没有发现阻挡点击的覆盖层</span>';
+            } else {
+                document.getElementById('result3').innerHTML = '<span class="error">⚠️ 发现可能阻挡的元素</span><br><pre>' + output + '</pre>';
+            }
+        }
+
+        // 测试4: 加载原CSS
+        function loadOriginalCSS() {
+            log('尝试加载index.html的CSS...');
+
+            fetch('index.html')
+                .then(r => r.text())
+                .then(html => {
+                    // 提取style标签内容
+                    const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
+                    if (styleMatch) {
+                        const style = document.createElement('style');
+                        style.textContent = styleMatch[1];
+                        document.head.appendChild(style);
+                        log('✅ 已加载index.html的样式');
+                        document.getElementById('result4').innerHTML = '<span class="success">✅ CSS已加载，现在试试点击其他按钮</span>';
+                    }
+                })
+                .catch(e => {
+                    log('❌ 加载失败: ' + e.message);
+                    document.getElementById('result4').innerHTML = '<span class="error">❌ 加载失败</span>';
+                });
+        }
+
+        // 全局点击监听
+        document.addEventListener('click', function(e) {
+            log(`全局点击: ${e.target.tagName} ${e.target.textContent?.substring(0, 20) || ''}`);
+        }, true);
+
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            log('✅ 页面加载完成');
+            log(`URL: ${window.location.href}`);
+            log(`协议: ${window.location.protocol}`);
+
+            if (window.location.protocol === 'file:') {
+                log('⚠️ 警告: 使用file://协议');
+            }
+        });
+
+        // 检查键盘事件
+        document.addEventListener('keydown', function(e) {
+            if (e.key === ' ') {
+                log('键盘事件: 空格键 (说明键盘工作正常)');
+            }
+        });
+    </script>
+</body>
+</html>

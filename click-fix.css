@@ -1,0 +1,64 @@
+/**
+ * 点击问题修复CSS
+ * 确保所有可点击元素都能正常工作
+ */
+
+/* 强制覆盖层不阻挡点击 */
+.bg-gradient,
+.particles,
+.grain-overlay,
+.film-grain {
+    pointer-events: none !important;
+}
+
+/* 确保所有可点击元素可以接收点击 */
+button,
+a,
+input[type="button"],
+input[type="submit"],
+.album-btn,
+.photo-card,
+.travel-tab,
+.location-tab,
+.image-card,
+[class*="btn"],
+[class*="button"],
+[onclick],
+[role="button"] {
+    pointer-events: auto !important;
+}
+
+/* 确保子元素也不被影响 */
+.album-btn *,
+.photo-card *,
+.travel-tab *,
+.location-tab *,
+.image-card * {
+    pointer-events: auto !important;
+}
+
+/* 修复lightbox */
+.lightbox:not(.active) {
+    pointer-events: none !important;
+}
+
+.lightbox.active {
+    pointer-events: auto !important;
+}
+
+/* 确保主要内容区域可点击 */
+body,
+.container,
+.gallery-container,
+header,
+main,
+section {
+    pointer-events: auto !important;
+}
+
+/* 确保表单元素可点击 */
+input,
+textarea,
+select {
+    pointer-events: auto !important;
+}

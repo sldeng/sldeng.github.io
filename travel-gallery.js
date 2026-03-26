@@ -71,6 +71,29 @@ class TravelGallery {
         section.className = 'travel-gallery-section';
 
         section.innerHTML = `
+            <!-- 古风顶部导航 -->
+            <nav class="ancient-nav">
+                <div class="nav-seal">
+                    <span class="seal-text">拾光</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#" class="nav-link" data-section="home">
+                        <span class="link-vertical">首页</span>
+                    </a>
+                    <a href="#" class="nav-link" data-section="gallery">
+                        <span class="link-vertical">影集</span>
+                    </a>
+                    <a href="#" class="nav-link" data-section="about">
+                        <span class="link-vertical">关于</span>
+                    </a>
+                </div>
+                <div class="nav-decoration">
+                    <span class="decoration-line"></span>
+                    <span class="decoration-text">行·摄</span>
+                    <span class="decoration-line"></span>
+                </div>
+            </nav>
+
             <div class="gallery-container">
                 <!-- Tab导航 -->
                 <nav class="travel-tabs" id="travel-tabs">
@@ -104,10 +127,25 @@ class TravelGallery {
         // 插入到页面中（在body的末尾）
         document.body.appendChild(section);
 
+        // 绑定导航事件
+        this.bindNavEvents();
+
         console.log('✓ 画廊UI已创建并添加到页面');
 
         // 生成旅行标签
         this.renderTravelTabs();
+    }
+
+    bindNavEvents() {
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = link.dataset.section;
+                console.log(`导航到: ${section}`);
+                // 这里可以添加实际的导航逻辑
+            });
+        });
     }
 
     renderTravelTabs() {
@@ -262,9 +300,19 @@ class TravelGallery {
             }
 
             // 渲染图片网格
-            images.forEach((imageUrl, idx) => {
-                const imgCard = this.createImageCard(imageUrl, idx);
+            images.forEach((imageData, idx) => {
+                const imgCard = this.createImageCard(imageData.url, idx, imageData.date, imageData.fullDate);
                 grid.appendChild(imgCard);
+
+                // 图片加载完成后触发动画
+                const img = imgCard.querySelector('img');
+                if (img.complete) {
+                    imgCard.classList.add('loaded');
+                } else {
+                    img.addEventListener('load', () => {
+                        imgCard.classList.add('loaded');
+                    });
+                }
             });
 
             console.log(`已加载 ${images.length} 张图片`);
@@ -278,7 +326,7 @@ class TravelGallery {
 
     /**
      * 获取地点的图片列表
-     * 从images.json配置文件读取
+     * 从images.json配置文件读取（支持新旧格式）
      */
     async getImageList(travelPath, location) {
         const imagePath = `${travelPath}/${location}/`;
@@ -294,8 +342,22 @@ class TravelGallery {
             const data = await response.json();
             const images = data.images || [];
 
-            // 返回完整的图片URL
-            return images.map(img => `${imagePath}${img}`);
+            // 检查格式：新格式包含对象数组，旧格式是字符串数组
+            if (images.length > 0 && typeof images[0] === 'object') {
+                // 新格式：[{ file: "xxx.jpg", date: "2022-08-06" }, ...]
+                return images.map(img => ({
+                    url: `${imagePath}${img.file}`,
+                    date: img.date,
+                    fullDate: img.fullDate
+                }));
+            } else {
+                // 旧格式：["xxx.jpg", "yyy.jpg"]
+                return images.map(img => ({
+                    url: `${imagePath}${img}`,
+                    date: null,
+                    fullDate: null
+                }));
+            }
 
         } catch (error) {
             console.error(`加载 ${location} 的图片清单失败:`, error);
@@ -303,20 +365,106 @@ class TravelGallery {
         }
     }
 
-    createImageCard(imageUrl, index) {
+    createImageCard(imageUrl, index, date = null, fullDate = null) {
         const card = document.createElement('div');
         card.className = 'image-card';
-        card.style.animationDelay = `${index * 0.05}s`;
+        // 移除animationDelay，使用 IntersectionObserver 来触发动画
+        card.dataset.index = index;
+
+        // 创建图片包装器
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'img-wrapper';
 
         const img = document.createElement('img');
         img.src = imageUrl;
         img.alt = `旅行照片 ${index + 1}`;
         img.loading = 'lazy';
 
+        imgWrapper.appendChild(img);
+        card.appendChild(imgWrapper);
+
+        // 添加边框流光
+        const borderFlow = document.createElement('div');
+        borderFlow.className = 'border-flow';
+        card.appendChild(borderFlow);
+
+        // 添加反光层
+        const reflection = document.createElement('div');
+        reflection.className = 'reflection';
+        card.appendChild(reflection);
+
+        // 添加角落装饰
+        const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+        corners.forEach(corner => {
+            const decoration = document.createElement('div');
+            decoration.className = `corner-decoration ${corner}`;
+            card.appendChild(decoration);
+        });
+
+        // 添加浮动粒子
+        const particles = document.createElement('div');
+        particles.className = 'particles';
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = `${20 + Math.random() * 60}%`;
+            particle.style.top = `${20 + Math.random() * 60}%`;
+            particle.style.animationDelay = `${Math.random() * 2.5}s`;
+            particle.style.animationDuration = `${2 + Math.random() * 2}s`;
+            particles.appendChild(particle);
+        }
+        card.appendChild(particles);
+
+        // 添加脉冲光圈
+        const pulseRing = document.createElement('div');
+        pulseRing.className = 'pulse-ring';
+        card.appendChild(pulseRing);
+
+        // 添加聚光灯效果
+        const spotlight = document.createElement('div');
+        spotlight.className = 'spotlight';
+        card.appendChild(spotlight);
+
+        // 添加鼠标跟随3D效果和聚光灯
+        card.addEventListener('mousemove', (e) => {
+            if (!card.classList.contains('loaded')) return;
+
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const rotateX = (y - centerY) / 12;
+            const rotateY = (centerX - x) / 12;
+
+            card.style.transform = `
+                translateY(-12px)
+                perspective(1000px)
+                rotateX(${rotateX}deg)
+                rotateY(${rotateY}deg)
+            `;
+
+            // 聚光灯跟随
+            spotlight.style.left = `${x - 75}px`;
+            spotlight.style.top = `${y - 75}px`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            if (!card.classList.contains('loaded')) return;
+            card.style.transform = '';
+        });
+
+        // 添加日期标签
+        if (date || fullDate) {
+            const dateLabel = document.createElement('div');
+            dateLabel.className = 'image-date';
+            dateLabel.textContent = fullDate || date;
+            card.appendChild(dateLabel);
+        }
+
         // 点击放大
         card.addEventListener('click', () => this.openLightbox(imageUrl));
 
-        card.appendChild(img);
         return card;
     }
 

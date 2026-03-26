@@ -1,12 +1,24 @@
 #!/usr/bin/env node
 
 /**
- * 自动生成每个地点的images.json文件
+ * 自动生成每个地点的images.json文件（包含日期信息）
  * 使用方法: node generate-image-lists.js
  */
 
 const fs = require('fs');
 const path = require('path');
+
+// 导入日期提取工具
+let getImageDate, formatDetailDate;
+try {
+    const dateUtils = require('./extract-date.js');
+    getImageDate = dateUtils.getImageDate;
+    formatDetailDate = dateUtils.formatDetailDate;
+} catch (e) {
+    console.warn('警告: 无法加载extract-date.js，将不显示日期');
+    getImageDate = () => null;
+    formatDetailDate = () => null;
+}
 
 // 配置
 const CONFIG = {
@@ -16,7 +28,7 @@ const CONFIG = {
 };
 
 /**
- * 获取文件夹内的所有图片文件
+ * 获取文件夹内的所有图片文件（包含日期信息）
  */
 function getImagesInDir(dirPath) {
     try {
@@ -31,19 +43,26 @@ function getImagesInDir(dirPath) {
 
             // 只处理图片文件
             if (CONFIG.imageExtensions.includes(ext) && fs.statSync(fullPath).isFile()) {
-                images.push(item);
+                // 提取图片日期
+                const dateInfo = getImageDate(fullPath);
+
+                images.push({
+                    filename: item,
+                    date: dateInfo ? dateInfo.formatted : null,
+                    fullDate: dateInfo ? formatDetailDate(new Date(dateInfo.raw)) : null
+                });
             }
         }
 
         // 按文件名排序
         return images.sort((a, b) => {
             // 尝试数字排序
-            const numA = parseInt(a.match(/\d+/g)?.join('') || '999999');
-            const numB = parseInt(b.match(/\d+/g)?.join('') || '999999');
+            const numA = parseInt(a.filename.match(/\d+/g)?.join('') || '999999');
+            const numB = parseInt(b.filename.match(/\d+/g)?.join('') || '999999');
             if (numA !== numB) {
                 return numA - numB;
             }
-            return a.localeCompare(b);
+            return a.filename.localeCompare(b.filename);
         });
     } catch (error) {
         console.error(`读取文件夹失败: ${dirPath}`, error.message);
@@ -52,15 +71,22 @@ function getImagesInDir(dirPath) {
 }
 
 /**
- * 为地点生成images.json
+ * 为地点生成images.json（包含日期信息）
  */
 function generateImagesJson(locationPath, locationName) {
-    const images = getImagesInDir(locationPath);
+    const imageData = getImagesInDir(locationPath);
 
-    if (images.length === 0) {
+    if (imageData.length === 0) {
         console.log(`  ⚠️  ${locationName} - 没有图片`);
         return false;
     }
+
+    // 转换为新格式：images数组包含文件名和日期
+    const images = imageData.map(img => ({
+        file: img.filename,
+        date: img.date,
+        fullDate: img.fullDate
+    }));
 
     const jsonContent = JSON.stringify({ images }, null, 2);
     const jsonPath = path.join(locationPath, 'images.json');
