@@ -104,7 +104,7 @@
             height: 4px;
             background: white;
             border-radius: 50%;
-            animation: flash 0.1s ease-in-out infinite;
+            animation: flash 0.8s ease-in-out infinite;
         }
 
         @keyframes flash {
@@ -959,7 +959,7 @@
             setTimeout(() => flash.remove(), 150);
         }
         // 每2秒闪光一次
-        setInterval(screenFlash, 2000);
+        setInterval(screenFlash, 8000); // 降低频率到8秒一次
 
         // 额外的高频闪光
         function quickFlash() {
@@ -969,7 +969,7 @@
             document.body.appendChild(flash);
             setTimeout(() => flash.remove(), 80);
         }
-        setInterval(quickFlash, 1000);
+        // setInterval(quickFlash, 1000); // 已禁用高频闪光
 
         // Album switching
         const albumBtns = document.querySelectorAll('.album-btn');
