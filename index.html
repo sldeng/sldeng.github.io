@@ -112,6 +112,89 @@
             50% { opacity: 1; transform: scale(2); box-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #ff00de, 0 0 40px #ff00de; }
         }
 
+        /* 全屏闪光效果 */
+        .screen-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9999;
+            pointer-events: none;
+            animation: flash-screen 0.15s ease-out;
+        }
+
+        @keyframes flash-screen {
+            0% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        /* 多点闪光爆发 */
+        .flash-burst {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #fff 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            animation: burst-flash 0.5s ease-out infinite;
+        }
+
+        @keyframes burst-flash {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(5);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(10);
+                opacity: 0;
+            }
+        }
+
+        /* 扫描光束 */
+        .scan-flash {
+            position: absolute;
+            width: 3px;
+            height: 100vh;
+            background: linear-gradient(to bottom, transparent, #fff, transparent);
+            animation: scan-move 2s linear infinite;
+            filter: blur(2px);
+        }
+
+        @keyframes scan-move {
+            0% { left: -10px; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { left: 100%; opacity: 0; }
+        }
+
+        /* 闪电效果 */
+        .lightning {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            z-index: 9998;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .lightning.flash {
+            animation: lightning-flash 0.2s ease-out;
+        }
+
+        @keyframes lightning-flash {
+            0%, 100% { opacity: 0; }
+            10%, 30%, 50% { opacity: 0.9; }
+            20%, 40% { opacity: 0.3; }
+        }
+
         .rainbow-bg {
             position: fixed;
             top: 0;
@@ -754,6 +837,7 @@
     <div class="particles" id="particles"></div>
     <div class="grain-overlay"></div>
     <div class="blind-overlay" id="blind-overlay"></div>
+    <div class="lightning" id="lightning"></div>
 
 
     
@@ -830,8 +914,62 @@
                 laser.style.animationDuration = (1.5 + Math.random() * 1.5) + 's';
                 container.appendChild(laser);
             }
+
+            // 创建闪光爆发点
+            for (let i = 0; i < 15; i++) {
+                const burst = document.createElement('div');
+                burst.className = 'flash-burst';
+                burst.style.left = Math.random() * 100 + '%';
+                burst.style.top = Math.random() * 100 + '%';
+                burst.style.animationDelay = Math.random() * 2 + 's';
+                burst.style.animationDuration = (0.3 + Math.random() * 0.5) + 's';
+                container.appendChild(burst);
+            }
+
+            // 创建扫描光束
+            for (let i = 0; i < 3; i++) {
+                const scan = document.createElement('div');
+                scan.className = 'scan-flash';
+                scan.style.animationDelay = (i * 0.7) + 's';
+                scan.style.animationDuration = (1.5 + Math.random()) + 's';
+                container.appendChild(scan);
+            }
         }
         createBlindEffect();
+
+        // 随机闪电效果
+        function triggerLightning() {
+            const lightning = document.getElementById('lightning');
+            lightning.classList.add('flash');
+            setTimeout(() => {
+                lightning.classList.remove('flash');
+            }, 200);
+
+            // 随机下次闪电时间 (2-6秒)
+            setTimeout(triggerLightning, 2000 + Math.random() * 4000);
+        }
+        // 启动闪电效果
+        setTimeout(triggerLightning, 1000);
+
+        // 定时全屏闪光
+        function screenFlash() {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 150);
+        }
+        // 每2秒闪光一次
+        setInterval(screenFlash, 2000);
+
+        // 额外的高频闪光
+        function quickFlash() {
+            const flash = document.createElement('div');
+            flash.className = 'screen-flash';
+            flash.style.animationDuration = '0.08s';
+            document.body.appendChild(flash);
+            setTimeout(() => flash.remove(), 80);
+        }
+        setInterval(quickFlash, 1000);
 
         // Album switching
         const albumBtns = document.querySelectorAll('.album-btn');
