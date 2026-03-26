@@ -1,0 +1,49 @@
+/* 图片3D碎片效果 */
+
+/* 确保img-wrapper支持3D */
+.image-card .img-wrapper,
+.photo-card .photo-card-inner {
+    position: relative;
+    overflow: visible !important;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* 碎片容器 */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 100;
+    pointer-events: auto;
+    cursor: pointer;
+    perspective: 800px;
+    perspective-origin: center center;
+    transform-style: preserve-3d;
+}
+
+/* 单个碎片 - 3D加速 */
+.particle-fragment {
+    position: absolute;
+    transform-style: preserve-3d;
+    backface-visibility: visible;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+/* 隐藏原始图片 */
+.particle-container ~ img,
+.img-wrapper:has(.particle-container) img {
+    opacity: 0 !important;
+}
+
+/* 确保装饰层不阻挡事件 */
+.image-card .corner-decoration,
+.image-card .particles,
+.image-card .pulse-ring,
+.image-card .spotlight,
+.image-card .reflection,
+.image-card .border-flow {
+    pointer-events: none !important;
+}

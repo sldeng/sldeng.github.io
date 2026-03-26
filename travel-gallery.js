@@ -306,11 +306,22 @@ class TravelGallery {
 
                 // 图片加载完成后触发动画
                 const img = imgCard.querySelector('img');
+                // 设置CORS支持，让canvas可以读取像素
+                img.crossOrigin = 'anonymous';
+
                 if (img.complete) {
                     imgCard.classList.add('loaded');
+                    // 图片加载完成后初始化粒子效果
+                    if (window.initParticleImages) {
+                        window.initParticleImages();
+                    }
                 } else {
                     img.addEventListener('load', () => {
                         imgCard.classList.add('loaded');
+                        // 图片加载完成后初始化粒子效果
+                        if (window.initParticleImages) {
+                            window.initParticleImages();
+                        }
                     });
                 }
             });
